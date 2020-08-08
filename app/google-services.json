@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "400046040498",
+    "firebase_url": "https://lella-food.firebaseio.com",
+    "project_id": "lella-food",
+    "storage_bucket": "lella-food.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:400046040498:android:bf14fb8ab9ee0012f470ab",
+        "android_client_info": {
+          "package_name": "com.fouadbahari.lellafood"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "400046040498-26kmo7ashpbumgampr0oim1js2o8r0ka.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC6dCQp-Uv617zruDcVl1pohg9IIs5B3DY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "400046040498-26kmo7ashpbumgampr0oim1js2o8r0ka.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
