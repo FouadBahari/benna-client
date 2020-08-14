@@ -12,7 +12,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.RelativeLayout;
+import android.widget.Toast;
 
+import com.fouadbahari.lellafood.Common.Common;
 import com.fouadbahari.lellafood.Model.User;
 import com.fouadbahari.lellafood.View.HomeActivity;
 import com.fouadbahari.lellafood.View.MapsActivity;
@@ -22,13 +24,16 @@ import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.rengwuxian.materialedittext.MaterialEditText;
 
 import dmax.dialog.SpotsDialog;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity   {
 
     private Button btnSignIn, btnRegister;
 
@@ -44,15 +49,15 @@ public class MainActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
 
-        FirebaseUser mFirebaseUser=auth.getCurrentUser();
+        final FirebaseUser mFirebaseUser=auth.getCurrentUser();
         if (mFirebaseUser!=null){
-            startActivity(new Intent(MainActivity.this,HomeActivity.class));
+            startActivity(new Intent(MainActivity.this, HomeActivity.class));
             finish();
 
-        }else {}
+        }
+
 
     }
-
 
 
 
@@ -63,7 +68,7 @@ public class MainActivity extends AppCompatActivity {
 
         auth = FirebaseAuth.getInstance();
         db = FirebaseDatabase.getInstance();
-        users = db.getReference("Users");
+        users = db.getReference(Common.USER_REFERENCES);
 
 
         btnRegister = (Button) findViewById(R.id.registerBtnId);
@@ -140,12 +145,13 @@ public class MainActivity extends AppCompatActivity {
                             @Override
                             public void onSuccess(AuthResult authResult) {
 
-                                User user = new User();
+                                final User user = new User();
                                 user.setEmail(email.getText().toString());
                                 user.setName(name.getText().toString());
                                 user.setPassword(password.getText().toString());
                                 user.setPhone(phone.getText().toString());
                                 user.setAddress(address.getText().toString());
+                                user.setUid(FirebaseAuth.getInstance().getCurrentUser().getUid());
 
 
                                 users.child(FirebaseAuth.getInstance().getCurrentUser().getUid())
@@ -156,6 +162,7 @@ public class MainActivity extends AppCompatActivity {
 
                                                 Snackbar.make(rootLayout, "Register success!",
                                                         Snackbar.LENGTH_SHORT).show();
+                                                goToHomeActivity(user);
 
                                             }
                                         }).addOnFailureListener(new OnFailureListener() {
@@ -189,6 +196,14 @@ public class MainActivity extends AppCompatActivity {
         });
 
         dialog.show();
+    }
+
+    private void goToHomeActivity(User user) {
+        Common.currentUser=user;
+
+        startActivity(new Intent(MainActivity.this, HomeActivity.class));
+        finish();
+
     }
 
 
@@ -232,8 +247,21 @@ public class MainActivity extends AppCompatActivity {
                             public void onSuccess(AuthResult authResult) {
 
                                 waitingDialog.dismiss();
-                                startActivity(new Intent(MainActivity.this, HomeActivity.class));
-                                finish();
+                                FirebaseUser mUser=FirebaseAuth.getInstance().getCurrentUser();
+                                users.child(mUser.getUid()).addListenerForSingleValueEvent(new ValueEventListener() {
+                                  @Override
+                                  public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                              User user = snapshot.getValue(User.class);
+                                              goToHomeActivity(user);
+                                  }
+
+                                  @Override
+                                  public void onCancelled(@NonNull DatabaseError error) {
+
+                                      Toast.makeText(MainActivity.this, ""+error.getMessage(),
+                                              Toast.LENGTH_SHORT).show();
+                                  }
+                              });
 
                             }
                         }).addOnFailureListener(new OnFailureListener() {
@@ -258,5 +286,6 @@ public class MainActivity extends AppCompatActivity {
         dialog.show();
 
     }
+
 
 }

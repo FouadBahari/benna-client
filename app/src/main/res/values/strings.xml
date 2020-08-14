@@ -15,4 +15,7 @@
     <string name="popular_categories">Popular Categories</string>
     <string name="best_deals">Best Deals</string>
     <string name="popular">Popular</string>
+    <string name="food_dtails_fragment">Food Details</string>
+    <string name="size">Size</string>
+    <string name="addon">Addon</string>
 </resources>

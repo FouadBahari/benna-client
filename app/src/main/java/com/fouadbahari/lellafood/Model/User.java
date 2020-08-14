@@ -1,5 +1,7 @@
 package com.fouadbahari.lellafood.Model;
 
+import com.google.firebase.database.DatabaseReference;
+
 public class User {
 
     private String email,name,password,phone,address,uid;

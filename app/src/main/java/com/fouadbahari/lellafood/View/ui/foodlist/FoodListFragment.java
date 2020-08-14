@@ -10,12 +10,14 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.fouadbahari.lellafood.Common.Common;
 import com.fouadbahari.lellafood.Controller.MyFoodListAdapter;
 import com.fouadbahari.lellafood.Model.FoodModel;
 import com.fouadbahari.lellafood.R;
@@ -61,6 +63,7 @@ public class FoodListFragment extends Fragment {
     }
 
     private void initViews() {
+        ((AppCompatActivity)getActivity()).getSupportActionBar().setTitle(Common.categorySelected.getName());
         recyclerFoodList.setHasFixedSize(true);
         recyclerFoodList.setLayoutManager(new LinearLayoutManager(getContext()));
         layoutAnimationController= AnimationUtils.loadLayoutAnimation(getContext(),R.anim.layout_item_from_left);

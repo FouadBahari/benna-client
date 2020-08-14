@@ -22,4 +22,9 @@
         android:name="com.fouadbahari.lellafood.View.ui.foodlist.FoodListFragment"
         android:label="@string/menu_food_list"
         tools:layout="@layout/fragment_food_list" />
+    <fragment
+        android:id="@+id/nav_fooddetails"
+        android:name="com.fouadbahari.lellafood.View.ui.fooddetails.FoodDtailsFragment"
+        android:label="@string/food_dtails_fragment"
+        tools:layout="@layout/food_dtails_fragment" />
 </navigation>
