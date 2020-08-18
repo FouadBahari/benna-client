@@ -18,7 +18,7 @@ public interface CartDataSource  {
 
     Single<Integer> countItemInCart(String uid);
 
-    Single<Long> sumPriceInCart(String uid);
+    Single<Double> sumPriceInCart(String uid);
 
     Single<CartItem> getItemInCart(String foodId,String uid);
 

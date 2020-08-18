@@ -1,5 +1,6 @@
 package com.fouadbahari.lellafood.View;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.nfc.Tag;
 import android.os.Bundle;
@@ -7,6 +8,7 @@ import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.Menu;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.andremion.counterfab.CounterFab;
@@ -14,11 +16,15 @@ import com.fouadbahari.lellafood.Common.Common;
 import com.fouadbahari.lellafood.Database.CartDataSource;
 import com.fouadbahari.lellafood.Database.CartDatabase;
 import com.fouadbahari.lellafood.Database.LocalCartDataSource;
+import com.fouadbahari.lellafood.EventBus.BestDealItemClick;
 import com.fouadbahari.lellafood.EventBus.CategoryClick;
 import com.fouadbahari.lellafood.EventBus.CounterCartEvent;
 import com.fouadbahari.lellafood.EventBus.FoodItemClick;
+import com.fouadbahari.lellafood.EventBus.HideFABCart;
+import com.fouadbahari.lellafood.EventBus.PopularCategoryClick;
 import com.fouadbahari.lellafood.MainActivity;
 import com.fouadbahari.lellafood.Model.CategoryModel;
+import com.fouadbahari.lellafood.Model.FoodModel;
 import com.fouadbahari.lellafood.Model.User;
 import com.fouadbahari.lellafood.R;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -35,6 +41,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
@@ -49,16 +56,20 @@ import org.greenrobot.eventbus.ThreadMode;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import dmax.dialog.SpotsDialog;
 import io.reactivex.SingleObserver;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
-public class HomeActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener,FirebaseAuth.AuthStateListener {
+public class HomeActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, FirebaseAuth.AuthStateListener {
 
     private AppBarConfiguration mAppBarConfiguration;
     private DrawerLayout drawer;
     private NavController navController;
+    private NavigationView navigationView;
+
+    android.app.AlertDialog dialog;
 
     private CartDataSource cartDataSource;
 
@@ -68,7 +79,7 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
     private FirebaseDatabase db;
     private DatabaseReference users;
     private FirebaseUser mUser;
-
+    private String lastUid;
 
 
     @BindView(R.id.fab)
@@ -88,34 +99,40 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
         setContentView(R.layout.activity_home);
 
 
-
         Toolbar toolbar = findViewById(R.id.toolbar);
         ButterKnife.bind(this);
-        cartDataSource=new LocalCartDataSource(CartDatabase.getInstance(this).cartDAO());
+        cartDataSource = new LocalCartDataSource(CartDatabase.getInstance(this).cartDAO());
 
+        dialog=new SpotsDialog.Builder().setContext(this).setCancelable(false).build();
 
+        auth=FirebaseAuth.getInstance();
         setSupportActionBar(toolbar);
-        FloatingActionButton fab = findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
-         drawer = findViewById(R.id.drawer_layout);
-        NavigationView navigationView = findViewById(R.id.nav_view);
+        counterFab = findViewById(R.id.fab);
+        drawer = findViewById(R.id.drawer_layout);
+        navigationView = findViewById(R.id.nav_view);
         // Passing each menu ID as a set of Ids because each
         // menu should be considered as top level destinations.
         mAppBarConfiguration = new AppBarConfiguration.Builder(
-                R.id.nav_home, R.id.nav_menu)
+                R.id.nav_home, R.id.nav_menu, R.id.nav_cart)
                 .setDrawerLayout(drawer)
                 .build();
-         navController = Navigation.findNavController(this, R.id.nav_host_fragment);
+        navController = Navigation.findNavController(this, R.id.nav_host_fragment);
         NavigationUI.setupActionBarWithNavController(this, navController, mAppBarConfiguration);
         NavigationUI.setupWithNavController(navigationView, navController);
         navigationView.setNavigationItemSelectedListener(this);
         navigationView.bringToFront();
+
+        getUserSetUI();
+
+
+
+        counterFab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                navController.navigate(R.id.nav_cart);
+
+            }
+        });
 
         countCartItem();
 
@@ -140,8 +157,7 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         item.setChecked(true);
         drawer.closeDrawers();
-        switch (item.getItemId())
-        {
+        switch (item.getItemId()) {
             case R.id.nav_home:
                 navController.navigate(R.id.nav_home);
                 break;
@@ -149,8 +165,47 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
             case R.id.nav_menu:
                 navController.navigate(R.id.nav_menu);
                 break;
+
+            case R.id.nav_cart:
+                navController.navigate(R.id.nav_cart);
+                break;
+
+            case R.id.nav_sign_out:
+                signOut();
+                break;
         }
         return true;
+    }
+
+    private void signOut() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Signout")
+                .setMessage("Do you really want to sign out?")
+                .setNegativeButton("CANCEL", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+
+                        dialog.dismiss();
+                    }
+                }).setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+
+                Common.selectedFood = null;
+                Common.categorySelected = null;
+                Common.currentUser = null;
+                FirebaseAuth.getInstance().signOut();
+
+                Intent intent = new Intent(HomeActivity.this, MainActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | intent.FLAG_ACTIVITY_CLEAR_TASK);
+                startActivity(intent);
+                finish();
+            }
+
+        });
+
+        AlertDialog dialog = builder.create();
+        dialog.show();
     }
 
 
@@ -164,7 +219,7 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
         FirebaseAuth.getInstance().addAuthStateListener(this);
         EventBus.getDefault().register(this);
 
-        mUser= FirebaseAuth.getInstance().getCurrentUser();
+        mUser = FirebaseAuth.getInstance().getCurrentUser();
         db = FirebaseDatabase.getInstance();
         users = db.getReference(Common.USER_REFERENCES);
         users.child(mUser.getUid()).addListenerForSingleValueEvent(new ValueEventListener() {
@@ -173,14 +228,17 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
 
 
                 User user = snapshot.getValue(User.class);
-                Common.currentUser=user;
-
+                Common.currentUser = user;
+                Common.userCurrent = user;
+                View headerView = navigationView.getHeaderView(0);
+                TextView txt_user = (TextView) headerView.findViewById(R.id.txt_user);
+                Common.setSpanString("Hey, ", Common.userCurrent.getName(), txt_user);
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
 
-                Toast.makeText(HomeActivity.this, ""+error.getMessage(),
+                Toast.makeText(HomeActivity.this, "" + error.getMessage(),
                         Toast.LENGTH_SHORT).show();
             }
         });
@@ -189,36 +247,176 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
 
     @Override
     protected void onStop() {
+
         EventBus.getDefault().unregister(this);
         super.onStop();
         FirebaseAuth.getInstance().removeAuthStateListener(this);
 
     }
 
-    @Subscribe(sticky = true,threadMode = ThreadMode.MAIN)
-    public void onCategorySelected(CategoryClick event)
-    {
-        if (event.isSuccess())
-        {
+    @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)
+    public void onCategorySelected(CategoryClick event) {
+        if (event.isSuccess()) {
             navController.navigate(R.id.nav_foodList);
         }
     }
 
 
-    @Subscribe(sticky = true,threadMode = ThreadMode.MAIN)
-    public void onFoodSelected(FoodItemClick event)
-    {
-        if (event.isSuccess())
-        {
+    @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)
+    public void onFoodSelected(FoodItemClick event) {
+        if (event.isSuccess()) {
             navController.navigate(R.id.nav_fooddetails);
         }
     }
 
-    @Subscribe(sticky = true,threadMode = ThreadMode.MAIN)
-    public void onCartCounter(CounterCartEvent event)
-    {
-        if (event.isSuccess())
-        {
+
+    @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)
+    public void onHideFABEvent(HideFABCart event) {
+        if (event.isHidden()) {
+
+            counterFab.hide();
+        } else counterFab.show();
+    }
+
+
+    @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)
+    public void onPopularCategoryClick(final PopularCategoryClick event) {
+        if (event.getPopularCategoryModel() != null) {
+
+            dialog.show();
+            FirebaseDatabase.getInstance()
+                    .getReference("Category")
+                    .child(event.getPopularCategoryModel().getMenu_id())
+                    .addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot snapshot) {
+
+                            if (snapshot.exists())
+                            {
+
+                                Common.categorySelected=snapshot.getValue(CategoryModel.class);
+
+                                FirebaseDatabase.getInstance()
+                                        .getReference("Category")
+                                        .child(event.getPopularCategoryModel().getMenu_id())
+                                        .child("foods")
+                                        .orderByChild("id")
+                                        .equalTo(event.getPopularCategoryModel().getFood_id())
+                                        .limitToLast(1)
+                                        .addListenerForSingleValueEvent(new ValueEventListener() {
+                                            @Override
+                                            public void onDataChange(@NonNull DataSnapshot snapshot) {
+
+                                                if (snapshot.exists())
+                                                {
+                                                    for (DataSnapshot snapshotItem:snapshot.getChildren())
+                                                    {
+                                                        Common.selectedFood=snapshotItem.getValue(FoodModel.class);
+                                                    }
+                                                    navController.navigate(R.id.nav_fooddetails);
+
+                                                }else {
+                                                    Toast.makeText(HomeActivity.this, "Item doesn't exist!", Toast.LENGTH_SHORT).show();
+                                                }
+                                                dialog.dismiss();
+                                            }
+
+                                            @Override
+                                            public void onCancelled(@NonNull DatabaseError error) {
+
+                                                dialog.dismiss();
+                                                Toast.makeText(HomeActivity.this, ""+error.getMessage(), Toast.LENGTH_SHORT).show();
+                                            }
+                                        });
+
+                            }else {
+                                dialog.dismiss();
+                                Toast.makeText(HomeActivity.this, "Item doesn't exist!", Toast.LENGTH_SHORT).show();
+                            }
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError error) {
+
+                            dialog.dismiss();
+                            Toast.makeText(HomeActivity.this, ""+error.getMessage(), Toast.LENGTH_SHORT).show();
+                        }
+                    });
+        }
+    }
+
+
+
+    @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)
+    public void onBestDealClick(final BestDealItemClick event) {
+        if (event.getBestDealModel() != null) {
+
+            dialog.show();
+            FirebaseDatabase.getInstance()
+                    .getReference("Category")
+                    .child(event.getBestDealModel().getMenu_id())
+                    .addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot snapshot) {
+
+                            if (snapshot.exists())
+                            {
+
+                                Common.categorySelected=snapshot.getValue(CategoryModel.class);
+
+                                FirebaseDatabase.getInstance()
+                                        .getReference("Category")
+                                        .child(event.getBestDealModel().getMenu_id())
+                                        .child("foods")
+                                        .orderByChild("id")
+                                        .equalTo(event.getBestDealModel().getFood_id())
+                                        .limitToLast(1)
+                                        .addListenerForSingleValueEvent(new ValueEventListener() {
+                                            @Override
+                                            public void onDataChange(@NonNull DataSnapshot snapshot) {
+
+                                                if (snapshot.exists())
+                                                {
+                                                    for (DataSnapshot snapshotItem:snapshot.getChildren())
+                                                    {
+                                                        Common.selectedFood=snapshotItem.getValue(FoodModel.class);
+                                                    }
+                                                    navController.navigate(R.id.nav_fooddetails);
+
+                                                }else {
+                                                    Toast.makeText(HomeActivity.this, "Item doesn't exist!", Toast.LENGTH_SHORT).show();
+                                                }
+                                                dialog.dismiss();
+                                            }
+
+                                            @Override
+                                            public void onCancelled(@NonNull DatabaseError error) {
+
+                                                dialog.dismiss();
+                                                Toast.makeText(HomeActivity.this, ""+error.getMessage(), Toast.LENGTH_SHORT).show();
+                                            }
+                                        });
+
+                            }else {
+                                dialog.dismiss();
+                                Toast.makeText(HomeActivity.this, "Item doesn't exist!", Toast.LENGTH_SHORT).show();
+                            }
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError error) {
+
+                            dialog.dismiss();
+                            Toast.makeText(HomeActivity.this, ""+error.getMessage(), Toast.LENGTH_SHORT).show();
+                        }
+                    });
+        }
+    }
+
+
+    @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)
+    public void onCartCounter(CounterCartEvent event) {
+        if (event.isSuccess()) {
             countCartItem();
         }
     }
@@ -242,27 +440,28 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
                     @Override
                     public void onError(Throwable e) {
 
-                        Toast.makeText(HomeActivity.this, "[Count Cart]"+e.getMessage(), Toast.LENGTH_SHORT).show();
+                        if (!e.getMessage().contains("Query returned empty")) {
+                            Toast.makeText(HomeActivity.this, "[Count Cart]" + e.getMessage(), Toast.LENGTH_SHORT).show();
+                        } else counterFab.setCount(0);
                     }
                 });
 
 
     }
 
+    private void getUserSetUI(){
+        lastUid = (auth == null || auth.getCurrentUser() == null) ?
+                null : auth.getUid();
+    }
+
     @Override
-    public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
-
-        if (firebaseAuth.getCurrentUser().getUid()==null)
-        {
-            startActivity(new Intent(HomeActivity.this,MainActivity.class));
+    public void onAuthStateChanged(@NonNull FirebaseAuth auth){
+        String uid = auth.getUid(); // could be null
+        if( (uid == null && lastUid != null) || // loggedout
+                (uid != null && lastUid == null) || // loggedin
+                (uid != null && lastUid != null && // switched accounts (unlikely)
+                        !uid.equals(lastUid))){
+            getUserSetUI();
         }
-
-        firebaseAuth.getCurrentUser().getIdToken(true).addOnSuccessListener(new OnSuccessListener<GetTokenResult>() {
-            @Override
-            public void onSuccess(GetTokenResult getTokenResult) {
-
-                Log.d("main","ONsUCCESS"+getTokenResult.getToken());
-            }
-        });
     }
 }

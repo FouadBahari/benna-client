@@ -4,7 +4,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
-import androidx.room.PrimaryKey;
 
 
 @Entity (tableName = "Cart", primaryKeys = {"uid" ,"foodId","foodAddon","foodSize"})

@@ -1,5 +1,14 @@
 package com.fouadbahari.lellafood.Common;
 
+import android.graphics.Paint;
+import android.graphics.Typeface;
+import android.text.SpannableString;
+import android.text.SpannableStringBuilder;
+import android.text.Spanned;
+import android.text.style.StyleSpan;
+import android.text.style.TypefaceSpan;
+import android.widget.TextView;
+
 import com.fouadbahari.lellafood.Model.AddonModel;
 import com.fouadbahari.lellafood.Model.CategoryModel;
 import com.fouadbahari.lellafood.Model.FoodModel;
@@ -23,6 +32,7 @@ public class Common {
 
     public static CategoryModel categorySelected;
     public static FoodModel selectedFood;
+    public static User userCurrent;
 
     public static String formatPrice(double price) {
         if (price != 0)
@@ -53,6 +63,20 @@ public class Common {
                 result+=addonModel.getPrice();
             return result;
         }
+
+    }
+
+    public static void setSpanString(String welcome, String name, TextView txt_user) {
+
+        SpannableStringBuilder builder=new SpannableStringBuilder();
+        builder.append(welcome);
+        SpannableString  spannableString=new SpannableString(name);
+        StyleSpan boldSpan=new StyleSpan(Typeface.BOLD);
+        spannableString.setSpan(boldSpan,0,name.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        builder.append(spannableString);
+        txt_user.setText(builder,TextView.BufferType.SPANNABLE);
+
+
 
     }
 }

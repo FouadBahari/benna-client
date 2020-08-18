@@ -11,8 +11,11 @@ import android.widget.TextView;
 
 import com.asksira.loopingviewpager.LoopingPagerAdapter;
 import com.bumptech.glide.Glide;
+import com.fouadbahari.lellafood.EventBus.BestDealItemClick;
 import com.fouadbahari.lellafood.Model.BestDealModel;
 import com.fouadbahari.lellafood.R;
+
+import org.greenrobot.eventbus.EventBus;
 
 import java.util.List;
 
@@ -42,10 +45,17 @@ public class MyBestDealAdapter extends LoopingPagerAdapter<BestDealModel> {
     }
 
     @Override
-    protected void bindView(View convertView, int listPosition, int viewType) {
+    protected void bindView(View convertView, final int listPosition, int viewType) {
 
         unbinder = ButterKnife.bind(this,convertView);
         Glide.with(convertView).load(itemList.get(listPosition).getImage()).into(imageBestDeal);
         textBestDeal.setText(itemList.get(listPosition).getName());
+
+        convertView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                EventBus.getDefault().postSticky(new BestDealItemClick(itemList.get(listPosition)));
+            }
+        });
     }
 }
