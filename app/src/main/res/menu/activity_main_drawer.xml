@@ -23,6 +23,15 @@
             android:title="@string/menu_cart" />
 
     </group>
+
+    <group android:id="@+id/group_view_order">
+        <item
+            android:id="@+id/nav_view_order"
+            android:icon="@drawable/ic_baseline_view_order_24"
+            android:title="@string/menu_view_order" />
+
+    </group>
+
     <group android:id="@+id/group_sign_out">
         <item
             android:id="@+id/nav_sign_out"

@@ -21,13 +21,17 @@ import com.fouadbahari.lellafood.EventBus.CategoryClick;
 import com.fouadbahari.lellafood.EventBus.CounterCartEvent;
 import com.fouadbahari.lellafood.EventBus.FoodItemClick;
 import com.fouadbahari.lellafood.EventBus.HideFABCart;
+import com.fouadbahari.lellafood.EventBus.MenuItemBack;
 import com.fouadbahari.lellafood.EventBus.PopularCategoryClick;
 import com.fouadbahari.lellafood.MainActivity;
 import com.fouadbahari.lellafood.Model.CategoryModel;
 import com.fouadbahari.lellafood.Model.FoodModel;
 import com.fouadbahari.lellafood.Model.User;
 import com.fouadbahari.lellafood.R;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.navigation.NavigationView;
@@ -39,6 +43,8 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.iid.FirebaseInstanceId;
+import com.google.firebase.iid.InstanceIdResult;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
@@ -73,13 +79,14 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
 
     private CartDataSource cartDataSource;
 
-
+    int menuClickId=-1;
 
     private FirebaseAuth auth;
     private FirebaseDatabase db;
     private DatabaseReference users;
     private FirebaseUser mUser;
     private String lastUid;
+    String token = FirebaseInstanceId.getInstance().getToken();
 
 
     @BindView(R.id.fab)
@@ -88,6 +95,7 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
 
     @Override
     protected void onResume() {
+        navController.navigate(R.id.nav_home);
         super.onResume();
         countCartItem();
 
@@ -113,7 +121,7 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
         // Passing each menu ID as a set of Ids because each
         // menu should be considered as top level destinations.
         mAppBarConfiguration = new AppBarConfiguration.Builder(
-                R.id.nav_home, R.id.nav_menu, R.id.nav_cart)
+                R.id.nav_home, R.id.nav_menu, R.id.nav_cart,R.id.nav_sign_out,R.id.nav_view_order)
                 .setDrawerLayout(drawer)
                 .build();
         navController = Navigation.findNavController(this, R.id.nav_host_fragment);
@@ -159,21 +167,31 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
         drawer.closeDrawers();
         switch (item.getItemId()) {
             case R.id.nav_home:
-                navController.navigate(R.id.nav_home);
+                if (item.getItemId()!=menuClickId)
+                    navController.navigate(R.id.nav_home);
                 break;
 
             case R.id.nav_menu:
-                navController.navigate(R.id.nav_menu);
+                if (item.getItemId()!=menuClickId)
+                    navController.navigate(R.id.nav_menu);
                 break;
 
             case R.id.nav_cart:
-                navController.navigate(R.id.nav_cart);
+                if (item.getItemId()!=menuClickId)
+                    navController.navigate(R.id.nav_cart);
                 break;
 
             case R.id.nav_sign_out:
                 signOut();
                 break;
+
+            case R.id.nav_view_order:
+                if (item.getItemId()!=menuClickId)
+                    navController.navigate(R.id.nav_view_order);
+                break;
         }
+        menuClickId=item.getItemId();
+
         return true;
     }
 
@@ -219,20 +237,41 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
         FirebaseAuth.getInstance().addAuthStateListener(this);
         EventBus.getDefault().register(this);
 
+
         mUser = FirebaseAuth.getInstance().getCurrentUser();
         db = FirebaseDatabase.getInstance();
         users = db.getReference(Common.USER_REFERENCES);
         users.child(mUser.getUid()).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
+            public void onDataChange(@NonNull final DataSnapshot snapshot) {
 
 
-                User user = snapshot.getValue(User.class);
-                Common.currentUser = user;
-                Common.userCurrent = user;
-                View headerView = navigationView.getHeaderView(0);
-                TextView txt_user = (TextView) headerView.findViewById(R.id.txt_user);
-                Common.setSpanString("Hey, ", Common.userCurrent.getName(), txt_user);
+
+                FirebaseInstanceId.getInstance().getInstanceId()
+                        .addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                                User user = snapshot.getValue(User.class);
+                                Common.currentUser = user;
+                                Common.userCurrent = user;
+                                Common.currentToken = token;
+                                View headerView = navigationView.getHeaderView(0);
+                                TextView txt_user = (TextView) headerView.findViewById(R.id.txt_user);
+                                Common.setSpanString("Hey, ", Common.userCurrent.getName(), txt_user);
+                            }
+                        }).addOnCompleteListener(new OnCompleteListener<InstanceIdResult>() {
+                    @Override
+                    public void onComplete(@NonNull Task<InstanceIdResult> task) {
+                        User user = snapshot.getValue(User.class);
+                        Common.currentUser = user;
+                        Common.userCurrent = user;
+                        Common.currentToken = token;
+                        Common.updateToken(HomeActivity.this,task.getResult().getToken());
+                        View headerView = navigationView.getHeaderView(0);
+                        TextView txt_user = (TextView) headerView.findViewById(R.id.txt_user);
+                        Common.setSpanString("Hey, ", Common.userCurrent.getName(), txt_user);
+                    }
+                });
             }
 
             @Override
@@ -295,6 +334,7 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
                             {
 
                                 Common.categorySelected=snapshot.getValue(CategoryModel.class);
+                                Common.categorySelected.setMenu_id(snapshot.getKey());
 
                                 FirebaseDatabase.getInstance()
                                         .getReference("Category")
@@ -312,6 +352,7 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
                                                     for (DataSnapshot snapshotItem:snapshot.getChildren())
                                                     {
                                                         Common.selectedFood=snapshotItem.getValue(FoodModel.class);
+                                                        Common.selectedFood.setKey(snapshotItem.getKey());
                                                     }
                                                     navController.navigate(R.id.nav_fooddetails);
 
@@ -363,6 +404,7 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
                             {
 
                                 Common.categorySelected=snapshot.getValue(CategoryModel.class);
+                                Common.categorySelected.setMenu_id(snapshot.getKey());
 
                                 FirebaseDatabase.getInstance()
                                         .getReference("Category")
@@ -380,6 +422,7 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
                                                     for (DataSnapshot snapshotItem:snapshot.getChildren())
                                                     {
                                                         Common.selectedFood=snapshotItem.getValue(FoodModel.class);
+                                                        Common.selectedFood.setKey(snapshotItem.getKey());
                                                     }
                                                     navController.navigate(R.id.nav_fooddetails);
 
@@ -463,5 +506,13 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
                         !uid.equals(lastUid))){
             getUserSetUI();
         }
+    }
+    @Subscribe(sticky = true,threadMode = ThreadMode.MAIN)
+    public void onMenuItemBack(MenuItemBack event)
+    {
+        menuClickId=-1;
+        if (getSupportFragmentManager().getBackStackEntryCount()>0)
+            getSupportFragmentManager().popBackStack();
+
     }
 }

@@ -22,8 +22,11 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.fouadbahari.lellafood.Common.Common;
 import com.fouadbahari.lellafood.Common.SpacesItemDecoraction;
 import com.fouadbahari.lellafood.Controller.MyCategoryAdapter;
+import com.fouadbahari.lellafood.EventBus.MenuItemBack;
 import com.fouadbahari.lellafood.Model.CategoryModel;
 import com.fouadbahari.lellafood.R;
+
+import org.greenrobot.eventbus.EventBus;
 
 import java.util.List;
 
@@ -96,5 +99,11 @@ public class MenuFragment extends Fragment {
         });
         recyclerCagtegory.setLayoutManager(layoutManager);
         recyclerCagtegory.addItemDecoration(new SpacesItemDecoraction(8));
+    }
+
+    @Override
+    public void onDestroy() {
+        EventBus.getDefault().postSticky(new MenuItemBack());
+        super.onDestroy();
     }
 }

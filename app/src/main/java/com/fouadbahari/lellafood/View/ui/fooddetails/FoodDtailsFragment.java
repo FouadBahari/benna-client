@@ -37,6 +37,7 @@ import com.fouadbahari.lellafood.Database.CartDatabase;
 import com.fouadbahari.lellafood.Database.CartItem;
 import com.fouadbahari.lellafood.Database.LocalCartDataSource;
 import com.fouadbahari.lellafood.EventBus.CounterCartEvent;
+import com.fouadbahari.lellafood.EventBus.MenuItemBack;
 import com.fouadbahari.lellafood.Model.AddonModel;
 import com.fouadbahari.lellafood.Model.CommentModel;
 import com.fouadbahari.lellafood.Model.FoodModel;
@@ -434,10 +435,10 @@ public class FoodDtailsFragment extends Fragment implements TextWatcher {
                 });
                 chip_group_user_selected.addView(chip);
             }
-        }else //if (Common.selectedFood.getUserSelectedAddon().size() == 0)
-        {
+        }else
+            {
             chip_group_user_selected.removeAllViews();
-        }
+             }
     }
 
     private void submitRatingToFirebase(final CommentModel commentModel) {
@@ -486,14 +487,13 @@ public class FoodDtailsFragment extends Fragment implements TextWatcher {
                                 foodModel.setRatingCount(0l);
                             double sumRating=foodModel.getRatingValue()+ratingValue;
                             long ratingCount=foodModel.getRatingCount()+1;
-                            double result=sumRating/ratingCount;
 
 
                             Map<String,Object>  updateData =new HashMap<>();
-                            updateData.put("ratingValue",result);
+                            updateData.put("ratingValue",sumRating);
                             updateData.put("ratingCount",ratingCount);
 
-                            foodModel.setRatingValue(result);
+                            foodModel.setRatingValue(sumRating);
                             foodModel.setRatingCount(ratingCount);
 
 
@@ -534,7 +534,7 @@ public class FoodDtailsFragment extends Fragment implements TextWatcher {
         food_price.setText(new StringBuilder(foodModel.getPrice().toString()));
 
         if (foodModel.getRatingValue() !=null)
-        ratingBar.setRating(foodModel.getRatingValue().floatValue());
+              ratingBar.setRating(foodModel.getRatingValue().floatValue() /foodModel.getRatingCount());
 
         ((AppCompatActivity)getActivity()).getSupportActionBar().setTitle(Common.selectedFood.getName());
 
@@ -587,7 +587,10 @@ public class FoodDtailsFragment extends Fragment implements TextWatcher {
 
 
 
-        totalPrice += Double.parseDouble(Common.selectedFood.getUserSelectedSize().getPrice().toString());
+            if (Common.selectedFood.getUserSelectedSize() != null)
+                 totalPrice += Double.parseDouble(Common.selectedFood.getUserSelectedSize().getPrice().toString());
+
+
         displayPrice=totalPrice*(Integer.parseInt(number_button.getNumber()));
         displayPrice=Math.round(displayPrice*100.0/100.0);
 
@@ -643,5 +646,10 @@ public class FoodDtailsFragment extends Fragment implements TextWatcher {
     public void onStop() {
         compositeDisposable.clear();
         super.onStop();
+    }
+    @Override
+    public void onDestroy() {
+        EventBus.getDefault().postSticky(new MenuItemBack());
+        super.onDestroy();
     }
 }

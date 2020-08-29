@@ -93,9 +93,11 @@ public class CommentsFragment extends BottomSheetDialogFragment implements IComm
 
                         for (DataSnapshot commentSnapshot:snapshot.getChildren())
                         {
-                            CommentModel commentModel=commentSnapshot.getValue(CommentModel.class);
-                            commentModels.add(commentModel);
+                            if(commentSnapshot.child("comment").toString() != null) {
+                                CommentModel commentModel = commentSnapshot.getValue(CommentModel.class);
+                                commentModels.add(commentModel);
 
+                            }
                         }
                         listener.onCommentsLoadSuccess(commentModels);
                     }

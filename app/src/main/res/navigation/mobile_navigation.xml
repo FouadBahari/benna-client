@@ -33,4 +33,10 @@
         android:name="com.fouadbahari.lellafood.View.ui.cart.CartFragment"
         android:label="@string/car_fragment"
         tools:layout="@layout/cart_fragment" />
+
+    <fragment
+        android:id="@+id/nav_view_order"
+        android:name="com.fouadbahari.lellafood.View.ui.vieworder.ViewOrderFragment"
+        android:label="@string/menu_view_order"
+        tools:layout="@layout/view_order_fragment" />
 </navigation>

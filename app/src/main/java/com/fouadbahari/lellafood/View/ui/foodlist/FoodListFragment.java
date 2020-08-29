@@ -19,8 +19,11 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.fouadbahari.lellafood.Common.Common;
 import com.fouadbahari.lellafood.Controller.MyFoodListAdapter;
+import com.fouadbahari.lellafood.EventBus.MenuItemBack;
 import com.fouadbahari.lellafood.Model.FoodModel;
 import com.fouadbahari.lellafood.R;
+
+import org.greenrobot.eventbus.EventBus;
 
 import java.util.List;
 
@@ -68,5 +71,11 @@ public class FoodListFragment extends Fragment {
         recyclerFoodList.setLayoutManager(new LinearLayoutManager(getContext()));
         layoutAnimationController= AnimationUtils.loadLayoutAnimation(getContext(),R.anim.layout_item_from_left);
 
+    }
+
+    @Override
+    public void onDestroy() {
+        EventBus.getDefault().postSticky(new MenuItemBack());
+        super.onDestroy();
     }
 }
