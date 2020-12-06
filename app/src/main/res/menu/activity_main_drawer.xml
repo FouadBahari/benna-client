@@ -3,34 +3,25 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:showIn="navigation_view">
 
-    <group android:id="@+id/group_home">
-        <item
-            android:id="@+id/nav_home"
-            android:icon="@drawable/ic_baseline_home_24"
-            android:title="@string/menu_home" />
-    </group>
+<!--    <group-->
+<!--        android:id="@+id/accueil_group"-->
+<!--        android:checkableBehavior="single">-->
+<!--        <item-->
+<!--            android:id="@+id/nav_accueil"-->
+<!--            android:icon="@drawable/ic_baseline_home_24"-->
+<!--            android:title="@string/menu_accueil" />-->
+<!--    </group>-->
 
-    <group android:id="@+id/group_categories">
+
+    <group
+        android:id="@+id/restaurant_group"
+        android:checkableBehavior="single">
         <item
-            android:id="@+id/nav_menu"
+            android:id="@+id/nav_restaurant"
             android:icon="@drawable/ic_baseline_restaurant_menu_24"
-            android:title="@string/menu_menu" />
-    </group>
-    <group android:id="@+id/group_cart">
-        <item
-            android:id="@+id/nav_cart"
-            android:icon="@drawable/ic_baseline_shopping_cart_24"
-            android:title="@string/menu_cart" />
-
+            android:title="@string/menu_restaurant" />
     </group>
 
-    <group android:id="@+id/group_view_order">
-        <item
-            android:id="@+id/nav_view_order"
-            android:icon="@drawable/ic_baseline_view_order_24"
-            android:title="@string/menu_view_order" />
-
-    </group>
 
     <group android:id="@+id/group_sign_out">
         <item

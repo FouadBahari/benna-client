@@ -19,7 +19,22 @@
             app:titleTextColor="@android:color/black"
             android:theme="@style/ToolbarColorBackArrow"
             app:popupTheme="@style/AppTheme.PopupOverlay"
-            />
+            >
+
+            <Button
+                android:id="@+id/address_layout"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@color/white"
+                android:drawableLeft="@drawable/ic_baseline_address_24"
+                android:paddingLeft="5dp"
+                android:text="Address"
+                android:fontFamily="@font/muli_black"
+                android:textAlignment="textStart"
+                android:textColor="@color/colorPrimary"
+                android:textSize="15dp" />
+            
+        </androidx.appcompat.widget.Toolbar>
 
     </com.google.android.material.appbar.AppBarLayout>
 

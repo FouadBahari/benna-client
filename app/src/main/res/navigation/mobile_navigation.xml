@@ -3,13 +3,21 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/mobile_navigation"
-    app:startDestination="@+id/nav_home">
+    app:startDestination="@+id/nav_restaurant">
+
 
     <fragment
-        android:id="@+id/nav_home"
-        android:name="com.fouadbahari.lellafood.View.ui.home.HomeFragment"
-        android:label="@string/menu_home"
-        tools:layout="@layout/fragment_home" />
+        android:id="@+id/nav_restaurant"
+        android:name="com.fouadbahari.lellafood.View.ui.restaurant.RestaurantFragment"
+        android:label="@string/menu_restaurant"
+        tools:layout="@layout/restaurant_fragment" >
+        <action android:id="@+id/action_nav_restaurant_to_nav_menu"
+            app:destination="@+id/nav_menu"
+            app:launchSingleTop="true"
+            app:popUpTo="@+id/your_MainGraph_id"
+            app:popUpToInclusive="true"/>
+    </fragment>
+
 
     <fragment
         android:id="@+id/nav_menu"
@@ -39,4 +47,13 @@
         android:name="com.fouadbahari.lellafood.View.ui.vieworder.ViewOrderFragment"
         android:label="@string/menu_view_order"
         tools:layout="@layout/view_order_fragment" />
+
+
+    <fragment
+        android:id="@+id/nav_gps"
+        android:name="com.fouadbahari.lellafood.View.ui.activategps.GPSFragment"
+        android:label="@string/menu_gps"
+        tools:layout="@layout/g_fragment"/>
+
+
 </navigation>

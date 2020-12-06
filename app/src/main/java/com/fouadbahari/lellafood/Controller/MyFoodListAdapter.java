@@ -25,6 +25,7 @@ import com.fouadbahari.lellafood.R;
 
 import org.greenrobot.eventbus.EventBus;
 
+import java.util.Collection;
 import java.util.List;
 
 import butterknife.BindView;
@@ -64,7 +65,8 @@ public class MyFoodListAdapter extends RecyclerView.Adapter<MyFoodListAdapter.My
 
         Glide.with(context).load(foodModelList.get(position).getImage()).into(holder.imageFoodList);
         holder.textFoodName.setText(new StringBuilder("").append(foodModelList.get(position).getName()));
-        holder.textFoodPrice.setText(new StringBuilder("$").append(foodModelList.get(position).getPrice()));
+        holder.textFoodPrice.setText(new StringBuilder("").append(foodModelList.get(position).getPrice())
+                            .append(" DZD"));
 
         holder.setListener(new IRecyclerClickListener() {
             @Override
@@ -79,25 +81,23 @@ public class MyFoodListAdapter extends RecyclerView.Adapter<MyFoodListAdapter.My
         holder.shoppingImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                final CartItem cartItem =new CartItem();
+                CartItem cartItem =new CartItem();
                 cartItem.setUid(Common.currentUser.getUid());
                 cartItem.setUserPhone(Common.currentUser.getPhone());
+                cartItem.setRestaurantId(Common.selectedRestaurant.getUid());
 
+                cartItem.setCategoryId(Common.categorySelected.getMenu_id());
                 cartItem.setFoodId(foodModelList.get(position).getId());
                 cartItem.setFoodName(foodModelList.get(position).getName());
                 cartItem.setFoodImage(foodModelList.get(position).getImage());
-
-
                 cartItem.setFoodPrice(Double.valueOf(String.valueOf(foodModelList.get(position).getPrice())));
                 cartItem.setFoodQuantity(1);
-                cartItem.setFoodExtraPrice(0.0);
-                cartItem.setFoodAddon("Default");
-                cartItem.setFoodSize("Default");
+
 
                 cartDataSource.getItemWhithAllOptionsInCart(Common.currentUser.getUid(),
+                        Common.categorySelected.getMenu_id(),
                         cartItem.getFoodId(),
-                        cartItem.getFoodSize(),
-                        cartItem.getFoodAddon())
+                        Common.selectedRestaurant.getUid())
                         .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe(new SingleObserver<CartItem>() {
@@ -112,9 +112,6 @@ public class MyFoodListAdapter extends RecyclerView.Adapter<MyFoodListAdapter.My
                                 if (cartItemFromDb.equals(cartItem))
                                 {
 
-                                    cartItemFromDb.setFoodExtraPrice(cartItem.getFoodExtraPrice());
-                                    cartItemFromDb.setFoodAddon(cartItem.getFoodAddon());
-                                    cartItemFromDb.setFoodSize(cartItem.getFoodSize());
                                     cartItemFromDb.setFoodQuantity(cartItem.getFoodQuantity() +cartItem.getFoodQuantity());
 
                                     cartDataSource.updateCartItems(cartItemFromDb)
@@ -202,6 +199,10 @@ public class MyFoodListAdapter extends RecyclerView.Adapter<MyFoodListAdapter.My
         return foodModelList.size();
     }
 
+    public List<FoodModel> getFoodList() {
+        return foodModelList;
+    }
+
     public class MyViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         private Unbinder unbinder;
 
@@ -211,8 +212,6 @@ public class MyFoodListAdapter extends RecyclerView.Adapter<MyFoodListAdapter.My
         TextView textFoodPrice;
         @BindView(R.id.imageFoodListId)
         ImageView imageFoodList;
-        @BindView(R.id.imageFavoId)
-        ImageView favoritImage;
         @BindView(R.id.imageShoppingId)
         ImageView shoppingImage;
 

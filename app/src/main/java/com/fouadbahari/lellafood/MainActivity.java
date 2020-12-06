@@ -1,30 +1,38 @@
 package com.fouadbahari.lellafood;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AlertDialog;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.FragmentTransaction;
 
-import android.Manifest;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
-import android.provider.Settings;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import com.firebase.ui.auth.AuthUI;
+import com.firebase.ui.auth.IdpResponse;
 import com.fouadbahari.lellafood.Common.Common;
 import com.fouadbahari.lellafood.Model.User;
 import com.fouadbahari.lellafood.View.HomeActivity;
-import com.fouadbahari.lellafood.View.MapsActivity;
+import com.google.android.gms.common.api.Status;
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
+import com.google.android.libraries.places.api.Places;
+import com.google.android.libraries.places.api.model.Place;
+import com.google.android.libraries.places.api.net.PlacesClient;
+import com.google.android.libraries.places.widget.AutocompleteSupportFragment;
+import com.google.android.libraries.places.widget.listener.PlaceSelectionListener;
 import com.google.android.material.snackbar.Snackbar;
-import com.google.firebase.auth.AuthResult;
+import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -32,295 +40,175 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import com.karumi.dexter.Dexter;
-import com.karumi.dexter.PermissionToken;
-import com.karumi.dexter.listener.PermissionDeniedResponse;
-import com.karumi.dexter.listener.PermissionGrantedResponse;
-import com.karumi.dexter.listener.PermissionRequest;
-import com.karumi.dexter.listener.single.PermissionListener;
-import com.rengwuxian.materialedittext.MaterialEditText;
+import com.google.firebase.iid.FirebaseInstanceId;
+import com.google.firebase.iid.InstanceIdResult;
 
-import dmax.dialog.SpotsDialog;
-
-public class MainActivity extends AppCompatActivity   {
-
-    private Button btnSignIn, btnRegister;
+import java.util.Arrays;
+import java.util.List;
 
 
-    private FirebaseAuth auth;
-    private FirebaseDatabase db;
+public class MainActivity extends AppCompatActivity {
+
+    private static int APP_REQUEST_CODE=7171;
+    private FirebaseAuth firebaseAuth;
+    private FirebaseAuth.AuthStateListener listener;
     private DatabaseReference users;
+    private List<AuthUI.IdpConfig> providers;
 
-    private RelativeLayout rootLayout;
+
 
 
 
     @Override
     protected void onStart() {
         super.onStart();
-
-        final FirebaseUser mFirebaseUser=auth.getCurrentUser();
-        if (mFirebaseUser!=null){
-            startActivity(new Intent(MainActivity.this, HomeActivity.class));
-            finish();
-
-        }
-
-
+        firebaseAuth.addAuthStateListener(listener);
     }
 
+    @Override
+    protected void onStop() {
+        if (listener != null)
+            firebaseAuth.removeAuthStateListener(listener);
+        super.onStop();
+    }
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        init();
+    }
 
-        auth = FirebaseAuth.getInstance();
-        db = FirebaseDatabase.getInstance();
-        users = db.getReference(Common.USER_REFERENCES);
-
-
-        btnRegister = (Button) findViewById(R.id.registerBtnId);
-        btnSignIn = (Button) findViewById(R.id.signInBtnId);
-        rootLayout = (RelativeLayout) findViewById(R.id.rootLayout);
-
-        Dexter.withActivity(this).withPermission(Manifest.permission.ACCESS_FINE_LOCATION)
-                .withListener(new PermissionListener() {
-                    @Override
-                    public void onPermissionGranted(PermissionGrantedResponse response) {
-
-                        btnSignIn.setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
-
-                                showLoginDialog();
-
-                            }
-                        });
+    private void init() {
+        providers = Arrays.asList(new AuthUI.IdpConfig.PhoneBuilder().build());
 
 
-                        btnRegister.setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
-                                showRegisterDialog();
-                            }
-                        });
-                    }
+        users = FirebaseDatabase.getInstance().getReference(Common.USER_REFERENCES);
+        firebaseAuth = FirebaseAuth.getInstance();
+        listener= new FirebaseAuth.AuthStateListener() {
+            @Override
+            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuthLocal) {
 
-                    @Override
-                    public void onPermissionDenied(PermissionDeniedResponse response) {
+                FirebaseUser user = firebaseAuthLocal.getCurrentUser();
+                if (user != null)
+                {
+                    checkServerUserFromFirebase(user);
 
-                        Intent intent=new Intent();
-                        intent.setAction(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
-                        Uri uri=Uri.fromParts("package",getPackageName(),null);
-                        intent.setData(uri);
-                        startActivity(intent);
-                    }
+                }
+                else {
+                    phoneLogin();
+                }
 
-                    @Override
-                    public void onPermissionRationaleShouldBeShown(PermissionRequest permission, PermissionToken token) {
-
-                        token.continuePermissionRequest();
-                    }
-                }).check();
-
+            }
+        };
 
 
     }
 
-    private void showRegisterDialog() {
-        AlertDialog.Builder dialog = new AlertDialog.Builder(this);
-        dialog.setTitle("Register");
-
-        LayoutInflater inflater = LayoutInflater.from(this);
-        View register_layout = inflater.inflate(R.layout.activity_register, null);
-
-        final MaterialEditText email = register_layout.findViewById(R.id.getEmailId);
-        final MaterialEditText password = register_layout.findViewById(R.id.getPasswordId);
-        final MaterialEditText name = register_layout.findViewById(R.id.getNameId);
-        final MaterialEditText phone = register_layout.findViewById(R.id.getPhoneId);
-        final MaterialEditText address = register_layout.findViewById(R.id.getAddressId);
-
-
-        dialog.setView(register_layout);
-
-        dialog.setPositiveButton("REGISTER", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-
-                dialog.dismiss();
-                if (TextUtils.isEmpty(email.getText().toString())) {
-                    Snackbar.make(rootLayout, "Please enter email address!", Snackbar.LENGTH_SHORT).show();
-                    return;
-                }
-
-                if (TextUtils.isEmpty(password.getText().toString())) {
-                    Snackbar.make(rootLayout, "Please enter password!", Snackbar.LENGTH_SHORT).show();
-                    return;
-                }
-
-                if (TextUtils.isEmpty(name.getText().toString())) {
-                    Snackbar.make(rootLayout, "Please enter name!", Snackbar.LENGTH_SHORT).show();
-                    return;
-                }
-
-                if (TextUtils.isEmpty(phone.getText().toString())) {
-                    Snackbar.make(rootLayout, "Please enter phone number!", Snackbar.LENGTH_SHORT).show();
-                    return;
-                }
-
-                if (TextUtils.isEmpty(address.getText().toString())) {
-                    Snackbar.make(rootLayout, "Please enter address number!", Snackbar.LENGTH_SHORT).show();
-                    return;
-                }
-                auth.createUserWithEmailAndPassword(email.getText().toString(), password.getText().toString())
-                        .addOnSuccessListener(new OnSuccessListener<AuthResult>() {
-                            @Override
-                            public void onSuccess(AuthResult authResult) {
-
-                                final User user = new User();
-                                user.setEmail(email.getText().toString());
-                                user.setName(name.getText().toString());
-                                user.setPassword(password.getText().toString());
-                                user.setPhone(phone.getText().toString());
-                                user.setAddress(address.getText().toString());
-                                user.setUid(FirebaseAuth.getInstance().getCurrentUser().getUid());
-
-
-                                users.child(FirebaseAuth.getInstance().getCurrentUser().getUid())
-                                        .setValue(user)
-                                        .addOnSuccessListener(new OnSuccessListener<Void>() {
-                                            @Override
-                                            public void onSuccess(Void aVoid) {
-
-                                                Snackbar.make(rootLayout, "Register success!",
-                                                        Snackbar.LENGTH_SHORT).show();
-                                                goToHomeActivity(user);
-
-                                            }
-                                        }).addOnFailureListener(new OnFailureListener() {
-                                    @Override
-                                    public void onFailure(@NonNull Exception e) {
-
-                                        Snackbar.make(rootLayout, "Failed"+e.getMessage(),
-                                                Snackbar.LENGTH_SHORT).show();
-                                    }
-                                });
-
-
-                            }
-                        }).addOnFailureListener(new OnFailureListener() {
+    private void checkServerUserFromFirebase(final FirebaseUser user) {
+//        dialog.show();
+        users.child(user.getUid())
+                .addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Snackbar.make(rootLayout, "Failed"+e.getMessage(),
-                                Snackbar.LENGTH_SHORT).show();
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+
+                        if (snapshot.exists())
+                        {
+                            User userModel =snapshot.getValue(User.class);
+
+                                goToHomeActivity(userModel);
+
+                        }
+                        else
+                        {
+                            registerToFirebase(user);
+                        }
+
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+
+                        Toast.makeText(MainActivity.this, ""+error.getMessage(), Toast.LENGTH_SHORT).show();
                     }
                 });
-
-            }
-        });
-
-        dialog.setNegativeButton("CANCEL", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-
-                dialog.dismiss();
-            }
-        });
-
-        dialog.show();
     }
 
-    private void goToHomeActivity(User user) {
-        Common.currentUser=user;
-
-        startActivity(new Intent(MainActivity.this, HomeActivity.class));
-        finish();
-
-
-    }
-
-
-    private void showLoginDialog()  {
-        AlertDialog.Builder dialog = new AlertDialog.Builder(this);
-        dialog.setTitle("Sign-in").setMessage("Please  use email to sign in!");
-
-        LayoutInflater inflater = LayoutInflater.from(this);
-        View signin_layout = inflater.inflate(R.layout.activity_sign_in, null);
-
-        final MaterialEditText email = signin_layout.findViewById(R.id.emailSignInID);
-        final MaterialEditText password = signin_layout.findViewById(R.id.passwordSignInId);
-
-
-        dialog.setView(signin_layout);
-
-        dialog.setPositiveButton("SIGN-IN", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-
-                dialog.dismiss();
-
-
-
-                if (TextUtils.isEmpty(email.getText().toString())) {
-                    Snackbar.make(rootLayout, "Please enter email address!", Snackbar.LENGTH_SHORT).show();
-                    return;
-                }
-
-                if (TextUtils.isEmpty(password.getText().toString())) {
-                    Snackbar.make(rootLayout, "Please enter password!", Snackbar.LENGTH_SHORT).show();
-                    return;
-                }
-
-                final android.app.AlertDialog waitingDialog= new SpotsDialog.Builder().setContext(MainActivity.this).build();
-                waitingDialog.show();
-
-                auth.signInWithEmailAndPassword(email.getText().toString(),password.getText().toString())
-                        .addOnSuccessListener(new OnSuccessListener<AuthResult>() {
-                            @Override
-                            public void onSuccess(AuthResult authResult) {
-
-                                waitingDialog.dismiss();
-                                FirebaseUser mUser=FirebaseAuth.getInstance().getCurrentUser();
-                                users.child(mUser.getUid()).addListenerForSingleValueEvent(new ValueEventListener() {
-                                  @Override
-                                  public void onDataChange(@NonNull DataSnapshot snapshot) {
-                                              User user = snapshot.getValue(User.class);
-                                              goToHomeActivity(user);
-                                  }
-
-                                  @Override
-                                  public void onCancelled(@NonNull DatabaseError error) {
-
-                                      Toast.makeText(MainActivity.this, ""+error.getMessage(),
-                                              Toast.LENGTH_SHORT).show();
-                                  }
-                              });
-
-                            }
-                        }).addOnFailureListener(new OnFailureListener() {
+    private void registerToFirebase(FirebaseUser user) {
+        User userModel = new User(user.getPhoneNumber(),user.getUid());
+        users.child(userModel.getUid())
+                .setValue(userModel)
+                .addOnFailureListener(new OnFailureListener() {
                     @Override
                     public void onFailure(@NonNull Exception e) {
-                        waitingDialog.dismiss();
-                        Snackbar.make(rootLayout, "Failed", Snackbar.LENGTH_SHORT).show();
 
+                        Toast.makeText(MainActivity.this, "" + e.getMessage(), Toast.LENGTH_SHORT).show();
 
                     }
-                });
-
-            }
-        });
-        dialog.setNegativeButton("CANCEL", new DialogInterface.OnClickListener() {
+                }).addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.dismiss();
+            public void onComplete(@NonNull Task<Void> task) {
+
+                goToHomeActivity(userModel);
             }
         });
-
-        dialog.show();
-
     }
 
 
+    private void goToHomeActivity(final User userModel) {
+        FirebaseInstanceId.getInstance().getInstanceId()
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+//                        Toast.makeText(MainActivity.this, ""+e.getMessage(), Toast.LENGTH_SHORT).show();
+//                        dialog.dismiss();
+                        Common.currentUser=userModel;
+                        startActivity(new Intent(MainActivity.this,HomeActivity.class));
+                        finish();
+                    }
+                }).addOnCompleteListener(new OnCompleteListener<InstanceIdResult>() {
+            @Override
+            public void onComplete(@NonNull Task<InstanceIdResult> task) {
+//                dialog.dismiss();
+                Common.currentUser=userModel;
+                Common.updateToken(MainActivity.this,task.getResult().getToken());
+                startActivity(new Intent(MainActivity.this,HomeActivity.class));
+                finish();
+            }
+        });
+
+
+
+    }
+
+    private void phoneLogin() {
+        startActivityForResult(AuthUI.getInstance()
+                        .createSignInIntentBuilder()
+                        .setTheme(R.style.LoginStyle)
+                        .setTosAndPrivacyPolicyUrls(
+                               " https://joebirch.co/terms.html",
+                    "https://joebirch.co/privacy.html")
+                        .setAvailableProviders(providers).build(), APP_REQUEST_CODE);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == APP_REQUEST_CODE)
+        {
+            IdpResponse response=IdpResponse.fromResultIntent(data);
+            if (resultCode==RESULT_OK)
+            {
+                FirebaseUser user =FirebaseAuth.getInstance().getCurrentUser();
+
+            }
+            else
+            {
+
+                Toast.makeText(this, "Login Failed", Toast.LENGTH_SHORT).show();
+
+            }
+        }
+    }
 }

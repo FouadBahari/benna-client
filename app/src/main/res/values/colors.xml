@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#e17055</color>
-    <color name="colorPrimaryDark">#d63031</color>
+    <color name="colorPrimary">#E9403a</color>
+    <color name="colorPrimaryDark">#fb1b13</color>
     <color name="colorAccent">#2d3436</color>
     <color name="logo_color">#d63031</color>
     <color name="ripple_effect_color">#c7ecee</color>
@@ -13,6 +13,13 @@
     <color name="base_press_color">#FAFAFA</color>
     <color name="ball_release_color">#9E9E9E</color>
     <color name="border_color">#AA333639</color>
+    <color name="white">#ffffff</color>
+    <color name="black">#000000</color>
+    <color name="purple">#ba53de</color>
+    <color name="pink">#f469a9</color>
+    <color name="blue">#88bef5</color>
+    <color name="benna">#eb2f26</color>
+    <color name="light_white">#f8f5f4</color>
 
 
 </resources>

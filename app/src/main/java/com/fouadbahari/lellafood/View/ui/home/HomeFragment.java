@@ -53,8 +53,10 @@ public class HomeFragment extends Fragment {
 
         unbinder = ButterKnife.bind(this,root);
 
+        String key = getArguments().getString("restaurant");
+
         init();
-        homeViewModel.getPopularList().observe((LifecycleOwner) getContext(), new Observer<List<PopularCategoryModel>>() {
+        homeViewModel.getPopularList(key).observe((LifecycleOwner) getContext(), new Observer<List<PopularCategoryModel>>() {
             @Override
             public void onChanged(List<PopularCategoryModel> popularCategoryModels) {
 
@@ -66,7 +68,7 @@ public class HomeFragment extends Fragment {
             }
         });
 
-        homeViewModel.getBestDealList().observe((LifecycleOwner) getContext(), new Observer<List<BestDealModel>>() {
+        homeViewModel.getBestDealList(key).observe((LifecycleOwner) getContext(), new Observer<List<BestDealModel>>() {
             @Override
             public void onChanged(List<BestDealModel> bestDealModels) {
                 MyBestDealAdapter adapter=new MyBestDealAdapter(getContext(),bestDealModels,true);

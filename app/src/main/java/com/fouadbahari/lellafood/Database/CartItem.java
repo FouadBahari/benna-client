@@ -6,11 +6,23 @@ import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 
 
-@Entity (tableName = "Cart", primaryKeys = {"uid" ,"foodId","foodAddon","foodSize"})
+@Entity (tableName = "Cart", primaryKeys = {"uid" ,"categoryId","foodId","restaurantId"})
 public class CartItem {
+
+
+
+    @NonNull
+    @ColumnInfo(name="restaurantId")
+    private String  restaurantId;
+
    @NonNull
     @ColumnInfo(name="foodId")
     private String  foodId;
+
+    @NonNull
+    @ColumnInfo(name="categoryId")
+    private String  categoryId;
+
 
     @ColumnInfo(name="foodName")
     private String  foodName;
@@ -27,21 +39,20 @@ public class CartItem {
     @ColumnInfo(name="userPhone")
     private String  userPhone;
 
-    @ColumnInfo(name="foodExtraPrice")
-    private Double  foodExtraPrice;
 
-    @NonNull
-    @ColumnInfo(name="foodAddon")
-    private String  foodAddon;
-
-    @NonNull
-    @ColumnInfo(name="foodSize")
-    private String  foodSize;
 
     @NonNull
     @ColumnInfo(name="uid")
     private String  uid;
 
+    @NonNull
+    public String getRestaurantId() {
+        return restaurantId;
+    }
+
+    public void setRestaurantId(@NonNull String restaurantId) {
+        this.restaurantId = restaurantId;
+    }
 
     public String getFoodId() {
         return foodId;
@@ -91,29 +102,7 @@ public class CartItem {
         this.userPhone = userPhone;
     }
 
-    public Double getFoodExtraPrice() {
-        return foodExtraPrice;
-    }
 
-    public void setFoodExtraPrice(Double foodExtraPrice) {
-        this.foodExtraPrice = foodExtraPrice;
-    }
-
-    public String getFoodAddon() {
-        return foodAddon;
-    }
-
-    public void setFoodAddon(String foodAddon) {
-        this.foodAddon = foodAddon;
-    }
-
-    public String getFoodSize() {
-        return foodSize;
-    }
-
-    public void setFoodSize(String foodSize) {
-        this.foodSize = foodSize;
-    }
 
     public String getUid() {
         return uid;
@@ -121,6 +110,16 @@ public class CartItem {
 
     public void setUid(String uid) {
         this.uid = uid;
+    }
+
+
+    @NonNull
+    public String getCategoryId() {
+        return categoryId;
+    }
+
+    public void setCategoryId(@NonNull String categoryId) {
+        this.categoryId = categoryId;
     }
 
     @Override
@@ -131,8 +130,6 @@ public class CartItem {
             return false;
         CartItem cartItem =(CartItem)obj;
 
-        return cartItem.getFoodId().equals(this.foodId) &&
-                cartItem.getFoodAddon().equals(this.foodAddon) &&
-                cartItem.getFoodSize().equals(this.foodSize);
+        return cartItem.getFoodId().equals(this.foodId);
     }
 }

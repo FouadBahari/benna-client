@@ -1,12 +1,12 @@
 package com.fouadbahari.lellafood.CallBack;
 
-import com.fouadbahari.lellafood.Model.Order;
+import com.fouadbahari.lellafood.Model.OrderModel;
 
 import java.util.List;
 
 public interface IloadOrderCallBackListener {
 
-    void onLoadOrderSuccess(List<Order> orderList);
+    void onLoadOrderSuccess(List<OrderModel> orderModelList);
     void onLoadPrderFailed(String message);
 
 }

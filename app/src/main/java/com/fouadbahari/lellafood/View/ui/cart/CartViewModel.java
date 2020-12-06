@@ -42,7 +42,7 @@ public class CartViewModel extends ViewModel {
 
     private void getAllCartItem() {
 
-        compositeDisposable.add(cartDataSource.getAllCart(FirebaseAuth.getInstance().getCurrentUser().getUid())
+        compositeDisposable.add(cartDataSource.getAllCart(Common.currentUser.getUid(),Common.selectedRestaurant.getUid())
         .subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())
         .subscribe(new Consumer<List<CartItem>>() {

@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Lella Food</string>
+    <string name="app_name">Benna</string>
     <string name="title_activity_maps">Map</string>
     <string name="title_activity_home">HomeActivity</string>
     <string name="navigation_drawer_open">Open navigation drawer</string>
@@ -11,7 +11,7 @@
     <string name="delete_cart">Clear cart</string>
 
     <string name="menu_home">Home</string>
-    <string name="menu_menu">Categories</string>
+    <string name="menu_menu">Home</string>
     <string name="menu_food_list">Food List</string>
     <string name="popular_categories">Popular Categories</string>
     <string name="best_deals">Best Deals</string>
@@ -23,6 +23,18 @@
     <string name="menu_cart">Cart</string>
     <string name="menu_sign_out">Sign out</string>
     <string name="menu_view_order">View Orders</string>
+    <string name="menu_gps">GPS</string>
+
+
+    <string name="action_search">Search</string>
+
+    <string name="google_maps_key" templateMergeStrategy="preserve" translatable="false">AIzaSyBKZzEnBjpQe1buX2I1qbrs-tbgpnsR768</string>
+    <string name="update_info">Update Info</string>
+    <string name="title_activity_tracking_order">Map</string>
+    <string name="menu_news">News</string>
+    <string name="menu_restaurant">Restaurants</string>
+    <string name="menu_accueil">Accueil</string>
+
 
 
 </resources>

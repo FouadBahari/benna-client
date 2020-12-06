@@ -12,7 +12,7 @@
         android:layout_height="wrap_content"
         android:id="@+id/recycle_cart"
         android:visibility="gone"
-        android:layout_alignParentTop="true"
+        android:layout_below="@+id/btn_view_order"
         android:layout_above="@+id/groupe_place_holder"/>
 
     <TextView
@@ -27,6 +27,8 @@
         android:layout_marginEnd="8dp"
         android:textSize="35sp"
         />
+
+
 
     <androidx.cardview.widget.CardView
         android:id="@+id/groupe_place_holder"
@@ -50,7 +52,8 @@
                 android:layout_marginStart="8dp"
                 android:layout_marginTop="8dp"
                 android:layout_marginEnd="8dp"
-                android:textSize="24sp"
+                android:textSize="12sp"
+                android:textColor="@color/colorPrimary"
                 />
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btn_place_holder"
@@ -66,4 +69,16 @@
         </LinearLayout>
 
     </androidx.cardview.widget.CardView>
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btn_view_order"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="View orders"
+        android:textSize="24sp"
+        android:fontFamily="@font/brandon_medium"
+        android:textAlignment="center"
+        android:textColor="@android:color/white"
+        android:layout_alignParentTop="true"
+        />
 </RelativeLayout>

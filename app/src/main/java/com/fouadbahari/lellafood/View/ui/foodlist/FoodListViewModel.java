@@ -16,7 +16,6 @@ public class FoodListViewModel extends ViewModel {
     public FoodListViewModel() {
 
     }
-
     public MutableLiveData<List<FoodModel>> getMutableLiveDataFoodList() {
         if (mutableLiveDataFoodList==null)
             mutableLiveDataFoodList=new MutableLiveData<>();

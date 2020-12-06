@@ -4,8 +4,10 @@ import java.util.List;
 
 public class CategoryModel {
 
-    private String menu_id,name,image;
+    private String menu_id,name,image,price;
      List<FoodModel> foods;
+    boolean active;
+
 
     public CategoryModel() {
     }
@@ -15,6 +17,22 @@ public class CategoryModel {
         this.name = name;
         this.image = image;
         this.foods = foods;
+    }
+
+    public boolean isActive() {
+        return active;
+    }
+
+    public void setActive(boolean active) {
+        this.active = active;
+    }
+
+    public String getPrice() {
+        return price;
+    }
+
+    public void setPrice(String price) {
+        this.price = price;
     }
 
     public String getMenu_id() {

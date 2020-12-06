@@ -4,18 +4,22 @@ import com.google.firebase.database.DatabaseReference;
 
 public class User {
 
-    private String email,name,password,phone,address,uid;
+    private String name,phone,address,uid;
+    private double lat,lng;
 
     public User() {
     }
 
-    public User(String email, String name, String password, String phone, String address,String uid) {
-        this.email = email;
+    public User( String name, String phone, String address,String uid) {
         this.name = name;
-        this.password = password;
         this.phone = phone;
         this.address = address;
         this.uid =uid;
+    }
+
+    public User(String phone, String uid) {
+        this.phone = phone;
+        this.uid = uid;
     }
 
     public String getUid() {
@@ -26,14 +30,6 @@ public class User {
         this.uid = uid;
     }
 
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
     public String getName() {
         return name;
     }
@@ -42,13 +38,6 @@ public class User {
         this.name = name;
     }
 
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
 
     public String getPhone() {
         return phone;
@@ -64,5 +53,21 @@ public class User {
 
     public void setAddress(String address) {
         this.address = address;
+    }
+
+    public double getLat() {
+        return lat;
+    }
+
+    public void setLat(double lat) {
+        this.lat = lat;
+    }
+
+    public double getLng() {
+        return lng;
+    }
+
+    public void setLng(double lng) {
+        this.lng = lng;
     }
 }

@@ -21,40 +21,40 @@ public class MenuViewModel extends ViewModel implements ICategoryCallBackLitener
 
 
     private MutableLiveData<List<CategoryModel>> categoryListMutable;
-    private MutableLiveData<String> messageError =new MutableLiveData<>();
+    private MutableLiveData<String> messageError = new MutableLiveData<>();
     private ICategoryCallBackLitener categoryCallBackLitener;
+
     public MenuViewModel() {
-
-        categoryCallBackLitener=this;
-
-
-
+        categoryCallBackLitener = this;
     }
 
     public MutableLiveData<List<CategoryModel>> getCategoryListMutable() {
 
-        if (categoryListMutable==null)
-        {
-            categoryListMutable=new MutableLiveData<>();
-            messageError =new MutableLiveData<>();
+        if (categoryListMutable == null) {
+            categoryListMutable = new MutableLiveData<>();
+            messageError = new MutableLiveData<>();
             loadCategory();
         }
         return categoryListMutable;
 
     }
 
-    private void loadCategory() {
-        final List<CategoryModel> tempList=new ArrayList<>();
-        DatabaseReference categoryRef= FirebaseDatabase.getInstance().getReference(Common.CATEGORY_REF);
+    public void loadCategory() {
+        final List<CategoryModel> tempList = new ArrayList<>();
+        DatabaseReference categoryRef = FirebaseDatabase.
+                getInstance().getReference(Common.RESTAURANT_RREF)
+                .child(Common.selectedRestaurant.getUid())
+                .child(Common.CATEGORY_REF);
         categoryRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
 
-                for (DataSnapshot itemSnapshot :snapshot.getChildren())
-                {
-                    CategoryModel categoryModel =itemSnapshot.getValue(CategoryModel.class);
+                for (DataSnapshot itemSnapshot : snapshot.getChildren()) {
+                    CategoryModel categoryModel = itemSnapshot.getValue(CategoryModel.class);
                     categoryModel.setMenu_id(itemSnapshot.getKey());
-                    tempList.add(categoryModel);
+                    if (categoryModel.isActive()) {
+                        tempList.add(categoryModel);
+                    }
 
                 }
                 categoryCallBackLitener.onCategoryLoadSuccess(tempList);

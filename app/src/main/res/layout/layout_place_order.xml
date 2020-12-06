@@ -6,24 +6,12 @@
     android:padding="8dp"
     android:background="@android:color/white">
 
-    <com.google.android.material.textfield.TextInputLayout
+
+    <fragment
+        android:id="@+id/places_autocomplete_fragment"
+        android:name="com.google.android.libraries.places.widget.AutocompleteSupportFragment"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:fontFamily="@font/brandon_medium"
-
-        >
-
-        <EditText
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:fontFamily="@font/brandon_medium"
-            android:id="@+id/edt_address"
-            android:hint="Enter Your Address"
-
-            />
-
-
-    </com.google.android.material.textfield.TextInputLayout>
+        android:layout_height="wrap_content" />
 
     <TextView
         android:id="@+id/txt_address_details"
@@ -37,29 +25,10 @@
         android:textColor="@android:color/black"
         />
 
-    <com.google.android.material.textfield.TextInputLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:fontFamily="@font/brandon_medium"
-
-        >
-
-        <EditText
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:fontFamily="@font/brandon_medium"
-            android:id="@+id/edt_commet_place_order"
-            android:hint="Enter Your Comment"
-
-            />
-
-
-    </com.google.android.material.textfield.TextInputLayout>
 
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Delivery Method"
         android:fontFamily="@font/brandon_medium"
         android:textSize="22sp"
         android:textStyle="bold"
@@ -75,24 +44,13 @@
         <RadioButton
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:id="@+id/rdi_home_address"
-            android:checked="true"
-            android:text="Home address"
-            android:fontFamily="@font/brandon_medium"
-            android:textSize="18sp"
-            android:textStyle="italic"
-            android:textColor="@color/base_release_color"
-            />
-
-        <RadioButton
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
             android:id="@+id/rdi_other_address"
             android:text="Other address"
             android:fontFamily="@font/brandon_medium"
             android:textSize="18sp"
             android:textStyle="italic"
             android:textColor="@color/base_release_color"
+
             />
 
         <RadioButton
@@ -140,18 +98,26 @@
             />
 
 
-        <RadioButton
+    </RadioGroup>
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/brandon_medium"
+
+        >
+
+        <EditText
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:id="@+id/rdi_Braintree"
-            android:text="Braintree"
             android:fontFamily="@font/brandon_medium"
-            android:textSize="18sp"
-            android:textStyle="italic"
-            android:textColor="@color/base_release_color"
+            android:id="@+id/edt_commet_place_order"
+            android:hint="Enter Your Comment"
+
             />
 
 
-    </RadioGroup>
+    </com.google.android.material.textfield.TextInputLayout>
+
 
 </LinearLayout>

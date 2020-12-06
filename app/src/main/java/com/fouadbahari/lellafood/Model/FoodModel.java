@@ -6,25 +6,21 @@ public class FoodModel {
     private String key;
     private String name,image,id,description;
     private Long price;
-    private List<AddonModel> addon;
-    private List<SizeModel> size;
+
     private Double ratingValue;
     private Long ratingCount;
 
-    private List<AddonModel> userSelectedAddon;
-    private SizeModel userSelectedSize;
 
     public FoodModel() {
     }
 
-    public FoodModel(String name, String image, String id, String description, Long price, List<AddonModel> addon, List<SizeModel> size) {
+    public FoodModel(String name, String image, String id, String description, Long price) {
         this.name = name;
         this.image = image;
         this.id = id;
         this.description = description;
         this.price = price;
-        this.addon = addon;
-        this.size = size;
+
     }
 
     public String getName() {
@@ -67,22 +63,6 @@ public class FoodModel {
         this.price = price;
     }
 
-    public List<AddonModel> getAddon() {
-        return addon;
-    }
-
-    public void setAddon(List<AddonModel> addon) {
-        this.addon = addon;
-    }
-
-    public List<SizeModel> getSize() {
-        return size;
-    }
-
-    public void setSize(List<SizeModel> size) {
-        this.size = size;
-    }
-
     public String getKey() {
         return key;
     }
@@ -107,19 +87,4 @@ public class FoodModel {
         this.ratingCount = ratingCount;
     }
 
-    public List<AddonModel> getUserSelectedAddon() {
-        return userSelectedAddon;
-    }
-
-    public void setUserSelectedAddon(List<AddonModel> userSelectedAddon) {
-        this.userSelectedAddon = userSelectedAddon;
-    }
-
-    public SizeModel getUserSelectedSize() {
-        return userSelectedSize;
-    }
-
-    public void setUserSelectedSize(SizeModel userSelectedSize) {
-        this.userSelectedSize = userSelectedSize;
-    }
 }

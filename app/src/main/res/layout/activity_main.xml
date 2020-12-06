@@ -1,92 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
+xmlns:app="http://schemas.android.com/apk/res-auto"
+xmlns:tools="http://schemas.android.com/tools"
+android:layout_width="match_parent"
+android:layout_height="match_parent"
+tools:context=".SplashScreen.SplashActivity"
+android:background="@color/colorPrimaryDark">
+
+
+
+<pl.droidsonroids.gif.GifImageView
+    android:id="@+id/benna_gif"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainActivity"
-    android:id="@+id/rootLayout"
-    android:background="@drawable/food_backround">
-    
-    <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:layout_marginTop="120dp"
-        android:layout_centerHorizontal="true"
-        android:gravity="center_horizontal">
+
+    android:src="@drawable/benna_gif"/>
 
 
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="L E L L A"
-            android:textAlignment="center"
-            android:textSize="50sp"
-            android:textColor="@color/logo_color"
-            />
-
-
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Food"
-            android:layout_marginTop="20dp"
-            android:textAlignment="center"
-            android:textSize="25sp"
-            android:textColor="@color/logo_color"/>
-
-
-    </LinearLayout>
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="20dp"
-        android:layout_marginBottom="20dp"
-        android:text="LOOKING FOR THE RIDER APP?"
-        android:textColor="@color/base_press_color"
-        android:textSize="15sp"
-        android:textAlignment="center"
-        android:id="@+id/textBottomId"
-        />
-
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:weightSum="2"
-        android:layout_above="@+id/textBottomId"
-        android:layout_margin="16dp"
-        >
-
-        <Button
-            android:id="@+id/signInBtnId"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:background="@drawable/btn_sign_in"
-            android:text="SIGN IN"
-            android:textColor="@color/base_press_color"
-            android:layout_weight="1"
-            android:textAllCaps="false"
-            android:layout_marginRight="6dp"/>
-
-        <Button
-            android:id="@+id/registerBtnId"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:background="@drawable/register_btn"
-            android:text="REGISTER"
-            android:textColor="@color/colorAccent"
-            android:layout_weight="1"
-            android:textAllCaps="false"
-            android:layout_marginLeft="6dp"/>
-    </LinearLayout>
 
 
 </RelativeLayout>
